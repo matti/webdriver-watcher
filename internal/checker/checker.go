@@ -15,31 +15,31 @@ type Sessions struct {
 	Session []Session `json:"value"`
 }
 
-func Check(baseURL string) (ok bool, status string) {
+func Check(baseURL string) (ok bool, maybe bool, status string) {
 	httpClient := &http.Client{
 		Timeout: time.Second * 3,
 	}
 
 	resp, err := httpClient.Get(baseURL + "/sessions")
 	if err != nil {
-		return true, err.Error()
+		return true, false, err.Error()
 	}
 	var sessions Sessions
 	json.NewDecoder(resp.Body).Decode(&sessions)
 
 	if len(sessions.Session) == 0 {
-		return true, "no sessions"
+		return true, false, "no sessions"
 	}
 
 	sessionURLURL := baseURL + "/session/" + sessions.Session[0].Id + "/url"
 	resp, err = http.Get(sessionURLURL)
 	if err != nil {
-		return true, err.Error()
+		return true, false, err.Error()
 	}
 
 	if resp.StatusCode != 200 {
-		return false, "not 200"
+		return false, false, "not 200"
 	}
 
-	return true, "ok"
+	return true, true, "ok"
 }

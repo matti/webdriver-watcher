@@ -4,14 +4,19 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/matti/webdriver-watcher/internal/checker"
 )
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		ok, status := checker.Check("http://localhost:9515")
+		ok, maybe, status := checker.Check("http://localhost:9515")
 		fmt.Fprintf(w, status)
+
+		if !maybe {
+			fmt.Println(time.Now().String(), status)
+		}
 		if !ok {
 			w.WriteHeader(http.StatusGatewayTimeout)
 		}
