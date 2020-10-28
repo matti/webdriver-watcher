@@ -17,7 +17,7 @@ type Sessions struct {
 
 func Check(baseURL string) (ok bool, status string) {
 	httpClient := &http.Client{
-		Timeout: time.Second * 1,
+		Timeout: time.Second * 3,
 	}
 
 	resp, err := httpClient.Get(baseURL + "/sessions")
