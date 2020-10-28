@@ -22,19 +22,19 @@ func Check(baseURL string) (ok bool, status string) {
 
 	resp, err := httpClient.Get(baseURL + "/sessions")
 	if err != nil {
-		return false, err.Error()
+		return true, err.Error()
 	}
 	var sessions Sessions
 	json.NewDecoder(resp.Body).Decode(&sessions)
 
 	if len(sessions.Session) == 0 {
-		return false, "no sessions"
+		return true, "no sessions"
 	}
 
 	sessionURLURL := baseURL + "/session/" + sessions.Session[0].Id + "/url"
 	resp, err = http.Get(sessionURLURL)
 	if err != nil {
-		return false, err.Error()
+		return true, err.Error()
 	}
 
 	if resp.StatusCode != 200 {
