@@ -3,25 +3,53 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
+	"os"
+	"os/exec"
+	"strconv"
 	"time"
 
 	"github.com/matti/webdriver-watcher/internal/checker"
 )
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	var errors = 0
+	maxErrors, err := strconv.Atoi(os.Args[1])
+	if err != nil {
+		log.Fatalln("invalid maxErrors")
+	}
+	checkEvery, err := strconv.Atoi(os.Args[2])
+	if err != nil {
+		log.Fatalln("invalid checkEvery")
+	}
+
+	notOkExec := os.Args[3]
+
+	for {
 		ok, maybe, status := checker.Check("http://localhost:9515")
-		fmt.Fprintf(w, status)
-
-		if !maybe {
-			fmt.Println(time.Now().String(), status)
-		}
+		fmt.Println(ok, maybe, errors, status)
 		if !ok {
-			w.WriteHeader(http.StatusGatewayTimeout)
+			errors++
+		} else {
+			errors = 0
 		}
-	})
 
-	fmt.Println("listen 0.0.0.0:9516")
-	log.Fatal(http.ListenAndServe("0.0.0.0:9516", nil))
+		if errors > maxErrors {
+			break
+		}
+
+		time.Sleep(time.Second * time.Duration(checkEvery))
+	}
+
+	fmt.Println("exec")
+	cmd := exec.Command(notOkExec)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stdout
+
+	err = cmd.Start()
+	if err != nil {
+		log.Fatalf("command start error %y", err)
+	}
+
+	cmd.Wait()
+	fmt.Println("exit")
 }

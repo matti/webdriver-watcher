@@ -2,6 +2,7 @@ package checker
 
 import (
 	"encoding/json"
+	"net"
 	"net/http"
 	"time"
 )
@@ -21,9 +22,12 @@ func Check(baseURL string) (ok bool, maybe bool, status string) {
 	}
 
 	resp, err := httpClient.Get(baseURL + "/sessions")
-	if err != nil {
+	if e, ok := err.(net.Error); ok && e.Timeout() {
+		return false, false, err.Error()
+	} else if err != nil {
 		return true, false, err.Error()
 	}
+
 	var sessions Sessions
 	json.NewDecoder(resp.Body).Decode(&sessions)
 
@@ -33,7 +37,9 @@ func Check(baseURL string) (ok bool, maybe bool, status string) {
 
 	sessionURLURL := baseURL + "/session/" + sessions.Session[0].Id + "/url"
 	resp, err = http.Get(sessionURLURL)
-	if err != nil {
+	if e, ok := err.(net.Error); ok && e.Timeout() {
+		return false, false, err.Error()
+	} else if err != nil {
 		return true, false, err.Error()
 	}
 
