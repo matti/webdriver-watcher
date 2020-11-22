@@ -25,8 +25,8 @@ func main() {
 	notOkExec := os.Args[3]
 
 	for {
-		ok, maybe, status := checker.Check("http://localhost:9515")
-		fmt.Println(ok, maybe, errors, status)
+		ok, maybe, stage, status := checker.Check("http://localhost:9515")
+		fmt.Println(ok, maybe, stage, status, errors)
 		if !ok {
 			errors++
 		} else {
