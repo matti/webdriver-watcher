@@ -16,36 +16,36 @@ type Sessions struct {
 	Session []Session `json:"value"`
 }
 
-func Check(baseURL string) (ok bool, maybe bool, status string) {
+func Check(baseURL string) (ok bool, maybe bool, stage string, status string) {
 	httpClient := &http.Client{
 		Timeout: time.Second * 3,
 	}
 
 	resp, err := httpClient.Get(baseURL + "/sessions")
 	if e, ok := err.(net.Error); ok && e.Timeout() {
-		return false, false, err.Error()
+		return false, false, "sessions", err.Error()
 	} else if err != nil {
-		return true, false, err.Error()
+		return false, false, "sessions", err.Error()
 	}
 
 	var sessions Sessions
 	json.NewDecoder(resp.Body).Decode(&sessions)
 
 	if len(sessions.Session) == 0 {
-		return true, false, "no sessions"
+		return false, false, "sessions", "no sessions"
 	}
 
 	sessionURLURL := baseURL + "/session/" + sessions.Session[0].Id + "/url"
 	resp, err = http.Get(sessionURLURL)
 	if e, ok := err.(net.Error); ok && e.Timeout() {
-		return false, false, err.Error()
+		return false, false, "session", err.Error()
 	} else if err != nil {
-		return true, false, err.Error()
+		return false, false, "session", err.Error()
 	}
 
 	if resp.StatusCode != 200 {
-		return false, false, "not 200"
+		return false, false, "session", "not 200"
 	}
 
-	return true, true, "ok"
+	return true, true, "session", "ok"
 }
