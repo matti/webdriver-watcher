@@ -40,7 +40,7 @@ func main() {
 			break
 		}
 
-		cdpOk, cdpStatus := cdp.Check("http://localhost:9222/json")
+		cdpOk, cdpStatus := cdp.Check("http://localhost:9222")
 		fmt.Println("cdp", cdpOk, cdpStatus)
 
 		if !cdpOk {
