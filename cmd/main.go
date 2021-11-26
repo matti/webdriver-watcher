@@ -8,11 +8,14 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/matti/webdriver-watcher/internal/cdp"
 	"github.com/matti/webdriver-watcher/internal/checker"
 )
 
 func main() {
 	var errors = 0
+	var cdpErrors = 0
+
 	maxErrors, err := strconv.Atoi(os.Args[1])
 	if err != nil {
 		log.Fatalln("invalid maxErrors")
@@ -26,7 +29,7 @@ func main() {
 
 	for {
 		ok, maybe, stage, status := checker.Check("http://localhost:9515")
-		fmt.Println(ok, maybe, stage, status, errors)
+		fmt.Println("webdriver", ok, maybe, stage, status, errors)
 		if !ok {
 			errors++
 		} else {
@@ -34,6 +37,19 @@ func main() {
 		}
 
 		if errors > maxErrors {
+			break
+		}
+
+		cdpOk, cdpStatus := cdp.Check("http://localhost:9222/json")
+		fmt.Println("cdp", cdpOk, cdpStatus)
+
+		if !cdpOk {
+			cdpErrors++
+		} else {
+			cdpErrors = 0
+		}
+
+		if cdpErrors > maxErrors {
 			break
 		}
 
