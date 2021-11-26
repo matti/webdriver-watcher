@@ -1,4 +1,4 @@
-package checker
+package cdp
 
 import (
 	"net"
@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func Cdp(baseURL string) (ok bool, status string) {
+func Check(baseURL string) (ok bool, status string) {
 	httpClient := &http.Client{
 		Timeout: time.Second * 3,
 	}
